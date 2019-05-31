@@ -1,9 +1,11 @@
-package com.ahuatian.javacode;
+package com.ahuatian.simpleutil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * ----------Dragon be here!----------/
@@ -29,8 +31,18 @@ import java.util.Comparator;
  **/
 public class SortUtil {
 
+    /**
+     *
+     * @param list
+     * @param properName 根据此关键字属性排序
+     * @param isAsc 为true的时候是正序，为false的时候是倒序
+     */
+    public static void sort(List<Object> list,String properName,boolean isAsc){
+        Collections.sort(list, new AnyProperComparator(properName,isAsc));
+    }
+
     // 按任意属性进行排序
-   public static class AnyProperComparator implements Comparator<Object> {
+    static class AnyProperComparator implements Comparator<Object> {
 
         private String properName;// 根据此关键字属性排序
 
@@ -75,10 +87,22 @@ public class SortUtil {
                 // 这里仅根据方法的返回值类型的名称来判定，比较方便
                 if ("String".equals(classType)) {
                     method = c.getMethod("get" + properName.substring(0, 1).toUpperCase() + properName.substring(1), new Class[] {});
-                    if (flag) {
-                        result = ((String) method.invoke(r1)).compareTo((String) method.invoke(r2));
-                    } else {
-                        result = ((String) method.invoke(r2)).compareTo((String) method.invoke(r1));
+                    if (StringUtil.isNumeric((String) method.invoke(r1))&&StringUtil.isNumeric((String) method.invoke(r2))){
+                        if (flag) {
+                            result = StringUtil.ObjectToDouble( method.invoke(r1) )-StringUtil.ObjectToDouble(method.invoke(r2));
+                        } else {
+                            result = StringUtil.ObjectToDouble( method.invoke(r2) )-StringUtil.ObjectToDouble(method.invoke(r1));
+                        }
+                    }else if(!StringUtil.isNumeric((String) method.invoke(r1))&&StringUtil.isNumeric((String) method.invoke(r2))){
+                        return 1;//比较 的 数据中 第一个不为数值，确保数值在前面
+                    } else if(StringUtil.isNumeric((String) method.invoke(r1))&&!StringUtil.isNumeric((String) method.invoke(r2))){
+                        return -1;//比较 的 数据中 第二个不为数值，确保数值在前面
+                    }else {
+                        if (flag) {
+                            result = ((String) method.invoke(r1)).compareTo((String) method.invoke(r2));
+                        } else {
+                            result = ((String) method.invoke(r2)).compareTo((String) method.invoke(r1));
+                        }
                     }
 
                 } else if ("Integer".equals(classType) || "int".equals(classType)) {
