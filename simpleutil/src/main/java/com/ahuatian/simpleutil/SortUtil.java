@@ -42,7 +42,7 @@ public class SortUtil {
     }
 
     // 按任意属性进行排序
-    static class AnyProperComparator implements Comparator<Object> {
+    private static class AnyProperComparator implements Comparator<Object> {
 
         private String properName;// 根据此关键字属性排序
 
@@ -155,4 +155,38 @@ public class SortUtil {
 
     }
 
+    
+    public static void sort(List<Object> list,final boolean isAsc){
+        Collections.sort(list, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                String str1 = o1 + "";
+                String str2 = o2 + "";
+                double result = 0.0;
+                if (StringUtil.isNumeric(str1) && StringUtil.isNumeric(str2)) {
+                    if (isAsc) {
+                        result = StringUtil.ObjectToDouble(str1) - StringUtil.ObjectToDouble(str2);
+                    } else {
+                        result = StringUtil.ObjectToDouble(str2) - StringUtil.ObjectToDouble(str1);
+                    }
+                } else if (!StringUtil.isNumeric(str1) && StringUtil.isNumeric(str2)) {
+                    return 1;
+                } else if (StringUtil.isNumeric(str1) && !StringUtil.isNumeric(str2)) {
+                    return -1;
+                } else {
+                    if (isAsc) {
+                        result = (str1).compareTo(str2);
+                    } else {
+                        result = (str2).compareTo(str1);
+                    }
+                }
+                if (result > 0) {
+                    return 1;
+                } else if (result < 0) {
+                    return -1;
+                } else
+                    return 0;
+            }
+        });
+    }
 }
